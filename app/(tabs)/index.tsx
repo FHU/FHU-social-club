@@ -6,14 +6,16 @@ import { useAuth } from '@/hooks/AuthContext';
 
 export default function TabOneScreen() {
 
-  const {user, register, login, loading} = useAuth()
+  const {user, member, loading} = useAuth()
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}></Text>
-      
+      <Text style={styles.title}>{member?.firstName} {member?.lastName}</Text>
       <Text> {user?.name}  </Text>
       <Text> {user?.email} </Text>
+      <Text> {member?.email} </Text>
+      <Text> {member?.club} </Text>
+      <Text> {member?.phone} </Text>
 
       <View style={styles.separator} lightColor="#eee" darkColor="rgba(255,255,255,0.1)" />
       <EditScreenInfo path="app/(tabs)/index.tsx" />

@@ -1,52 +1,190 @@
-import { appwrite } from "@/lib/appwrite";
-import { createContext, useContext, useEffect, useState } from "react";
+//import { appwrite } from "@/lib/appwrite";
+import {
+  APPWRITE_CONFIG,
+  createAppWriteService,
+  MemberInput,
+  MemberRow,
+} from "@/lib/appwrite";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Models } from "react-native-appwrite";
 
 type AuthContextType = {
   user: Models.User<Models.Preferences> | null;
   loading: boolean;
+  member: MemberRow | null;
+  error: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    name: string,
+    phone: string,
+    club: string
+  ) => Promise<void>;
   logout: () => Promise<void>;
-}
+  refresh: () => Promise<void>;
+  updateMember: (data: Partial<MemberInput>) => Promise<void>;
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const appwriteService = useMemo(
+    () => createAppWriteService(APPWRITE_CONFIG),
+    []
+  )
+
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(
     null
+  )
+  const [member, setMember] = useState<MemberRow | null>(null)
+  const [loading, setLoading] = useState(true)
+    const [error, setError] = useState("")
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      setLoading(true);
+      setError("");
+      try {
+        const loggedInUser = await appwriteService.loginWithEmail({
+          email,
+          password,
+        });
+        if (!loggedInUser) {
+          setError("Login failed. Check your credentials.");
+        } else {
+          setUser(loggedInUser);
+          const member = await appwriteService.getMemberByUserId(
+            loggedInUser.$id
+          );
+          setMember(member ?? null);
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Login failed");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [appwriteService]
   );
-  const [loading, setLoading] = useState(true);
+
+  const register = useCallback(
+    async (
+      email: string,
+      password: string,
+      name: string,
+      phone: string,
+      club: string
+    ) => {
+      setLoading(true);
+      setError("");
+      try {
+        const loggedInUser = await appwriteService.registerWithEmail({
+          email,
+          password,
+          name,
+          phone,
+          club,
+        });
+        if (!loggedInUser) {
+          setError("Registration failed. Please try again.");
+        } else {
+          setUser(loggedInUser);
+          const member = await appwriteService.getMemberByUserId(
+            loggedInUser.$id
+          );
+          setMember(member ?? null);
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Registration failed");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [appwriteService]
+  );
+
+  const logout = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      await appwriteService.logoutCurrentDevice();
+      setUser(null);
+      setMember(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Logout failed");
+    } finally {
+      setLoading(false);
+    }
+  }, [appwriteService]);
+
+  const loadAuthState = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const loggedInUser = await appwriteService.getCurrentUser();
+      if (loggedInUser) {
+        setUser(loggedInUser);
+        const member = await appwriteService.getMemberByUserId(
+          loggedInUser.$id
+        );
+        setMember(member ?? null);
+      } else {
+        setUser(null);
+        setMember(null);
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load auth state");
+      setUser(null);
+      setMember(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [appwriteService]);
 
   useEffect(() => {
-    (async () => {
-      const currentUser = await appwrite.getCurrentUser();
-      setUser(currentUser);
-      setLoading(false);
-    })();
-  }, []);
+    loadAuthState();
+  }, [loadAuthState]);
 
-  async function login(email: string, password: string) {
-    const loggedInUser = await appwrite.loginWithEmail({ email, password });
-    setUser(loggedInUser);
-  }
+  const refresh = useCallback(async () => {
+    loadAuthState();
+  }, [loadAuthState]);
 
-  async function register(email: string, password: string, name: string) {
-    const loggedInUser = await appwrite.registerWithEmail({
-      email,
-      password,
-      name,
-    });
-    setUser(loggedInUser);
-  }
-
-  async function logout() {
-    await appwrite.logoutCurrentDevice()
-    setUser(null)
-  }
+  const updateMember = useCallback(
+    async (data: Partial<MemberInput>) => {
+      if (!member) throw new Error("No member to update");
+      setLoading(true);
+      try {
+        const updated = await appwriteService.updateMember(member.$id, data);
+        setMember(updated);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [member, appwriteService]
+  );
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register,logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        member,
+        loading,
+        error,
+        login,
+        register,
+        logout,
+        refresh,
+        updateMember,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
