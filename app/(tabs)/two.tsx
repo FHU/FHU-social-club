@@ -15,7 +15,6 @@ export default function TabTwoScreen() {
 
   const loadMembers = useCallback( async()=> {
     const members = await appWriteService.getMembers("xbx")
-    console.log(members)
     setMembers(members)
 
   }, [appWriteService])
