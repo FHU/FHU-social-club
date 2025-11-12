@@ -46,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   )
   const [member, setMember] = useState<MemberRow | null>(null)
   const [loading, setLoading] = useState(true)
-    const [error, setError] = useState("")
+    const [error, setError] = useState<string|null>(null)
 
   const login = useCallback(
     async (email: string, password: string) => {

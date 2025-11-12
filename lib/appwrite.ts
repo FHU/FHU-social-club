@@ -230,51 +230,7 @@ export function createAppWriteService(config: AppWriteConfig) {
     createMemberForUser,
     ensureMemberForUser,
     updateMember,
+
+    getMembers
   };
 }
-
-/*const client = new Client()
-    .setEndpoint(APPWRITE_ENDPOINT)
-    .setProject(APPWRITE_PROJECT_ID)
-    .setPlatform(APPWRITE_PLATFORM_NAME)
-
-const account = new Account(client)
-
-async function registerWithEmail( {email, password,name} : {email:string, password:string, name:string}) {
-
-    await account.create({userId:ID.unique(), email, password, name})
-
-    await account.createEmailPasswordSession({email, password})
-
-    return await account.get<Models.User<Models.Preferences>>()
-} 
-
-async function loginWithEmail( {email, password}: {email:string, password:string}) {
-
-    await account.createEmailPasswordSession({email, password})
-
-    return await account.get<Models.User<Models.Preferences>>()
-}
-
-async function getCurrentUser() {
-    try {
-        const user = await account.get<Models.User<Models.Preferences>>()
-        return user
-    }
-    catch {
-        return null
-    }
-}
-
-async function logoutCurrentDevice() {
-    await account.deleteSession({sessionId: "current"})
-}
-
-export const appwrite = {
-    client,
-    account,
-    registerWithEmail,
-    loginWithEmail,
-    getCurrentUser,
-    logoutCurrentDevice
-}*/
