@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/AuthContext';
 
 export default function TabOneScreen() {
 
-  const {user, member, loading} = useAuth()
+  const {user, member} = useAuth()
 
   return (
     <View style={styles.container}>

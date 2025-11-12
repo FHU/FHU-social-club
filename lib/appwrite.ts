@@ -1,10 +1,10 @@
 import {
-    Account,
-    Client,
-    ID,
-    Models,
-    Query,
-    TablesDB,
+  Account,
+  Client,
+  ID,
+  Models,
+  Query,
+  TablesDB,
 } from "react-native-appwrite";
 import "react-native-url-polyfill/auto";
 
@@ -196,6 +196,23 @@ export function createAppWriteService(config: AppWriteConfig) {
       data,
     });
   };
+
+  const getMembers = async (club:string) => {
+
+    try {
+      const response = await tables.listRows<MemberRow>({
+        databaseId: config.databaseId,
+        tableId: config.membersTableId,
+        queries: [Query.equal("club", club)],
+      });
+
+      return response.rows ?? null;
+    } catch (exception) {
+      console.error("[getMembers] Error fetching members:", exception);
+      return null;
+    }
+
+  }
 
   return {
     // low-level objects
