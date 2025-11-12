@@ -20,7 +20,7 @@ const getAppWriteConfig = () => {
   if (!endpoint || !projectId || !platform || !databaseId || !membersTableId) {
     throw new Error(
       "Missing required AppWrite environment variables. " +
-      "Please check your .env file and ensure all EXPO_PUBLIC_APPWRITE_* variables are set."
+        "Please check your .env file and ensure all EXPO_PUBLIC_APPWRITE_* variables are set."
     );
   }
 
@@ -78,13 +78,13 @@ export function createAppWriteService(config: AppWriteConfig) {
     password,
     name,
     phone,
-    club
+    club,
   }: {
     email: string;
     password: string;
     name: string;
     phone: string;
-    club: string
+    club: string;
   }): Promise<Models.User<Models.Preferences> | null> => {
     try {
       await account.create({ userId: ID.unique(), email, password, name });
@@ -94,7 +94,10 @@ export function createAppWriteService(config: AppWriteConfig) {
 
       return user;
     } catch (exception) {
-      console.error("[registerWithEmail] Error during registration:", exception);
+      console.error(
+        "[registerWithEmail] Error during registration:",
+        exception
+      );
       return null;
     }
   };
@@ -115,15 +118,19 @@ export function createAppWriteService(config: AppWriteConfig) {
     }
   };
 
-  const getCurrentUser = async (): Promise<Models.User<Models.Preferences> | null> => {
-    try {
-      const user = await account.get<Models.User<Models.Preferences>>();
-      return user;
-    } catch (exception) {
-      console.error("[getCurrentUser] Error fetching current user:", exception);
-      return null;
-    }
-  };
+  const getCurrentUser =
+    async (): Promise<Models.User<Models.Preferences> | null> => {
+      try {
+        const user = await account.get<Models.User<Models.Preferences>>();
+        return user;
+      } catch (exception) {
+        console.error(
+          "[getCurrentUser] Error fetching current user:",
+          exception
+        );
+        return null;
+      }
+    };
 
   const logoutCurrentDevice = async () => {
     try {
@@ -134,7 +141,9 @@ export function createAppWriteService(config: AppWriteConfig) {
   };
 
   // MEMBERS - DATABASE
-  const getMemberByUserId = async (userID: string): Promise<MemberRow | null> => {
+  const getMemberByUserId = async (
+    userID: string
+  ): Promise<MemberRow | null> => {
     try {
       const response = await tables.listRows<MemberRow>({
         databaseId: config.databaseId,
@@ -197,13 +206,12 @@ export function createAppWriteService(config: AppWriteConfig) {
     });
   };
 
-  const getMembers = async (club:string) => {
-
+  const getMembers = async (club: string) => {
     try {
       const response = await tables.listRows<MemberRow>({
         databaseId: config.databaseId,
         tableId: config.membersTableId,
-        queries: [Query.equal("club", club)],
+        queries: [Query.equal("club", club), Query.orderAsc("lastName")],
       });
 
       return response.rows ?? null;
@@ -211,8 +219,7 @@ export function createAppWriteService(config: AppWriteConfig) {
       console.error("[getMembers] Error fetching members:", exception);
       return null;
     }
-
-  }
+  };
 
   return {
     // low-level objects
@@ -231,6 +238,6 @@ export function createAppWriteService(config: AppWriteConfig) {
     ensureMemberForUser,
     updateMember,
 
-    getMembers
+    getMembers,
   };
 }
