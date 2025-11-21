@@ -1,0 +1,28 @@
+npm verbose cli /usr/local/bin/node /usr/local/bin/npm
+npm info using npm@10.9.3
+npm info using node@v22.19.0
+npm verbose title npm install
+npm verbose argv "install" "--loglevel" "verbose"
+npm verbose logfile logs-max:10 dir:/Users/calebtodd/.npm/_logs/2025-10-29T15_16_38_934Z-
+npm verbose logfile /Users/calebtodd/.npm/_logs/2025-10-29T15_16_38_934Z-debug-0.log
+npm verbose stack JSONParseError: Unexpected end of JSON input while parsing empty string
+npm verbose stack     at /usr/local/lib/node_modules/npm/node_modules/read-package-json-fast/lib/index.js:7:61
+npm verbose stack     at async #initTree (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:268:21)
+npm verbose stack     at async Arborist.buildIdealTree (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:178:7)
+npm verbose stack     at async Promise.all (index 1)
+npm verbose stack     at async Arborist.reify (/usr/local/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:131:5)
+npm verbose stack     at async Install.exec (/usr/local/lib/node_modules/npm/lib/commands/install.js:150:5)
+npm verbose stack     at async Npm.exec (/usr/local/lib/node_modules/npm/lib/npm.js:207:9)
+npm verbose stack     at async module.exports (/usr/local/lib/node_modules/npm/lib/cli/entry.js:74:5)
+npm error code EJSONPARSE
+npm error path /Users/calebtodd/Documents/Data_StructuresFA25/FHU-social-club/package.json
+npm error JSON.parse Unexpected end of JSON input while parsing empty string
+npm error JSON.parse Failed to parse JSON data.
+npm error JSON.parse Note: package.json must be actual JSON, not just JavaScript.
+npm verbose cwd /Users/calebtodd/Documents/Data_StructuresFA25/FHU-social-club
+npm verbose os Darwin 24.6.0
+npm verbose node v22.19.0
+npm verbose npm  v10.9.3
+npm verbose exit 1
+npm verbose code 1
+npm error A complete log of this run can be found in: /Users/calebtodd/.npm/_logs/2025-10-29T15_16_38_934Z-debug-0.log
