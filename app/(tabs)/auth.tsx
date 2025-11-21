@@ -1,0 +1,265 @@
+import { useAuth } from "@/hooks/AuthContext";
+import React, { useState } from "react";
+import {
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+export default function AuthScreen() {
+  const {
+    user,
+    member,
+    loading,
+    error,
+    login,
+    register,
+    logout,
+    updateMember,
+    refresh,
+  } = useAuth();
+
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const [name, setName] = useState(""); // only used in register
+  const [club, setClub] = useState(""); // only used in register
+  const [phone, setPhone] = useState(""); // only used in register
+
+  const [submitting, setSubmitting] = useState(false);
+  //const [error, setError] = useState<string | null>(null);
+
+  async function handleSubmit() {
+    setSubmitting(true);
+    //setError(null);
+    try {
+      if (mode === "login") {
+        await login(email.trim(), password);
+      } else {
+        await register(email.trim(), password, name.trim(), phone, club);
+      }
+    } catch (err: any) {
+      // Appwrite throws rich errors (code, message, etc.)
+      //setError(err?.message || "Something went wrong.")
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (error) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
+  if (loading) {
+    // still checking existing session
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator />
+        <Text>Checking session…</Text>
+      </View>
+    );
+  }
+
+  // if logged in, show a simple profile + logout
+  if (user) {
+    return (
+      <ScrollView style={styles.scrollview}>
+        <View style={styles.container}>
+          <Text style={styles.title}>Welcome 👋</Text>
+          <Text style={styles.label}>Name (from User)</Text>
+          <Text style={styles.value}>{user.name}</Text>
+          <Text style={styles.label}>Name (from Member)</Text>
+          <Text style={styles.value}>
+            {member?.firstName} {member?.lastName}
+          </Text>
+          <Text style={styles.label}>Email (from User)</Text>
+          <Text style={styles.value}>{user.email}</Text>
+          <Text style={styles.label}>Email(from Member)</Text>
+          <Text style={styles.value}>{member?.email}</Text>
+          <Text style={styles.label}>Phone (from Member)</Text>
+          <Text style={styles.value}>{member?.phone}</Text>
+          <Text style={styles.label}>Club (from Member)</Text>
+          <Text style={styles.value}>{member?.club}</Text>
+
+          <TouchableOpacity
+            style={[styles.button, styles.logoutButton]}
+            onPress={logout}
+            disabled={submitting}
+          >
+            <Text style={styles.buttonText}>Log out</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    );
+  }
+
+  // if logged OUT, show login/register form
+  return (
+    <ScrollView style={styles.scrollview}>
+      <View style={styles.container}>
+        <Text style={styles.title}>
+          {mode === "login" ? "Login" : "Create Account"}
+        </Text>
+
+        {mode === "register" && (
+          <>
+            <Text style={styles.label}>Name</Text>
+            <TextInput
+              style={styles.input}
+              autoCapitalize="words"
+              value={name}
+              onChangeText={setName}
+              placeholder="Jane Doe"
+            />
+
+            <Text style={styles.label}>Club</Text>
+            <TextInput
+              style={styles.input}
+              value={club}
+              onChangeText={setClub}
+              placeholder="xbx"
+            />
+
+            <Text style={styles.label}>Phone</Text>
+            <TextInput
+              style={styles.input}
+              value={phone}
+              onChangeText={setPhone}
+              placeholder="+12223334444"
+            />
+          </>
+        )}
+
+        <Text style={styles.label}>Email</Text>
+        <TextInput
+          style={styles.input}
+          autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="you@example.com"
+        />
+
+        <Text style={styles.label}>Password</Text>
+        <TextInput
+          style={styles.input}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+          placeholder="••••••••"
+        />
+
+        {error && <Text style={styles.errorText}> {error} </Text>}
+
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSubmit}
+          disabled={submitting}
+        >
+          {submitting ? (
+            <ActivityIndicator />
+          ) : (
+            <Text style={styles.buttonText}>
+              {mode === "login" ? "Sign In" : "Sign Up"}
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setMode((m) => (m === "login" ? "register" : "login"))}
+        >
+          <Text style={styles.linkText}>
+            {mode === "login"
+              ? "Need an account? Sign up"
+              : "Already have an account? Sign in"}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  )
+}
+
+const styles = StyleSheet.create({
+  center: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  scrollview: {
+    flex: 1,
+    backgroundColor: "#0a0a0a",
+  },
+  container: {
+    flex: 1,
+    paddingTop: 96,
+    paddingHorizontal: 24,
+    backgroundColor: "#0a0a0a",
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "600",
+    color: "white",
+    marginBottom: 32,
+  },
+  label: {
+    color: "#aaa",
+    fontSize: 14,
+    marginBottom: 6,
+  },
+  value: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "500",
+    marginBottom: 16,
+  },
+  input: {
+    width: "100%",
+    borderColor: "#333",
+    borderWidth: 1,
+    backgroundColor: "#1a1a1a",
+    color: "white",
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 16,
+    marginBottom: 16,
+  },
+  button: {
+    width: "100%",
+    backgroundColor: "white",
+    borderRadius: 8,
+    alignItems: "center",
+    paddingVertical: 14,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  logoutButton: {
+    backgroundColor: "#ff4d4d",
+  },
+  buttonText: {
+    color: "black",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  linkText: {
+    color: "#5ea0ff",
+    textAlign: "center",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  errorText: {
+    color: "#ff6b6b",
+    marginBottom: 12,
+  },
+});
